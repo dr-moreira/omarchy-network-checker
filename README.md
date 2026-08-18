@@ -13,17 +13,16 @@ Omarchy bar widget that pings configured hosts and checks ports via the bundled 
 
 ```sh
 omarchy plugin add https://github.com/dr-moreira/omarchy-network-checker.git --enable
-~/.config/omarchy/plugins/io.github.dr-moreira.network-checker/install.sh
+PLUGIN="$HOME/.config/omarchy/plugins/io.github.dr-moreira.network-checker"
+cargo build --release --manifest-path "$PLUGIN/checker/Cargo.toml"
+mkdir -p "$HOME/.local/bin"
+cp "$PLUGIN/checker/target/release/network_checker" "$HOME/.local/bin/network_checker"
+mkdir -p "$HOME/.config/network_checker"
+test -f "$HOME/.config/network_checker/config.toml" || \
+  cp "$PLUGIN/checker/config.example.toml" "$HOME/.config/network_checker/config.toml"
 ```
 
-Edit `~/.config/network_checker/config.toml` with your hosts and ports. The installer writes an example file only when none exists.
-
-Local checkout:
-
-```sh
-./install.sh
-omarchy plugin add "$PWD" --enable
-```
+Edit `~/.config/network_checker/config.toml` with your hosts and ports. The example is copied only when that file does not exist.
 
 ## Usage
 
