@@ -1,55 +1,24 @@
 # Network Checker
 
-Omarchy bar widget that pings configured hosts and checks ports via the bundled `network_checker` Rust CLI. Offline servers highlight on the bar.
+Bar widget for [Omarchy](https://omarchy.org/) Quattro. It pings the hosts in your config and checks their ports. Offline machines light up on the bar.
 
-## Requirements
-
-- [Omarchy](https://omarchy.org/) with `omarchy-shell` (Quattro)
-- Rust/`cargo` to build the checker
-- `wl-copy` to copy a host from the panel
-- `iputils` (`ping`)
+![Network Checker panel](assets/screenshot.png)
 
 ## Install
 
 ```sh
 omarchy plugin add https://github.com/dr-moreira/omarchy-network-checker.git --enable
-PLUGIN="$HOME/.config/omarchy/plugins/io.github.dr-moreira.network-checker"
-cargo build --release --manifest-path "$PLUGIN/checker/Cargo.toml"
-mkdir -p "$HOME/.local/bin"
-cp "$PLUGIN/checker/target/release/network_checker" "$HOME/.local/bin/network_checker"
-mkdir -p "$HOME/.config/network_checker"
-test -f "$HOME/.config/network_checker/config.toml" || \
-  cp "$PLUGIN/checker/config.example.toml" "$HOME/.config/network_checker/config.toml"
 ```
 
-Edit `~/.config/network_checker/config.toml` with your hosts and ports. The example is copied only when that file does not exist.
-
-## Usage
-
-- Left click: open or close the server list
-- Middle / right click: refresh
-- Click a row: copy the host with `wl-copy`
-- `r` in the popup: refresh
-- Escape: close
+That is enough to enable the widget. Then add your hosts:
 
 ```sh
-omarchy-shell shell summon io.github.dr-moreira.network-checker '{}'
-omarchy-shell shell hide io.github.dr-moreira.network-checker
+mkdir -p ~/.config/network_checker
+cp ~/.config/omarchy/plugins/io.github.dr-moreira.network-checker/checker/config.example.toml \
+  ~/.config/network_checker/config.toml
 ```
 
-## Configure
-
-```sh
-omarchy bar move io.github.dr-moreira.network-checker --section right
-```
-
-Widget settings on the bar entry in `~/.config/omarchy/shell.json`:
-
-- `refreshIntervalSec` — poll interval (default 60)
-- `command` — optional path to `network_checker`
-- `configFile` — optional TOML path passed as `--file`
-
-The checker also reads `~/.config/network_checker/config.toml` by default.
+Edit `~/.config/network_checker/config.toml`. The widget already speaks that file; no compiler is required.
 
 ```toml
 [[servers]]
@@ -58,22 +27,57 @@ host = "192.168.1.10"
 ports = [22, 445]
 ```
 
-Standalone CLI:
+## Usage
+
+- Left click — open or close the list
+- Middle or right click — refresh
+- Click a row — copy the host (`wl-copy`)
+- `r` — refresh
+- Escape — close
+
+```sh
+omarchy bar move io.github.dr-moreira.network-checker --section right
+omarchy-shell shell summon io.github.dr-moreira.network-checker '{}'
+omarchy-shell shell hide io.github.dr-moreira.network-checker
+```
+
+## Settings
+
+On the `io.github.dr-moreira.network-checker` bar entry in `~/.config/omarchy/shell.json`:
+
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `refreshIntervalSec` | `60` | How often to poll |
+| `command` | empty | Optional checker binary (`network_checker`) |
+| `configFile` | empty | Optional TOML path (`--file`) |
+
+Needs `python3`, `ping` (`iputils`), and `wl-copy` to copy a host.
+
+## Optional Rust CLI
+
+The same report is available from the bundled Rust program if you want a standalone binary or `--daemon` notifications:
+
+```sh
+PLUGIN="$HOME/.config/omarchy/plugins/io.github.dr-moreira.network-checker"
+cargo build --release --manifest-path "$PLUGIN/checker/Cargo.toml"
+cp "$PLUGIN/checker/target/release/network_checker" ~/.local/bin/network_checker
+```
 
 ```sh
 network_checker --json
 network_checker --daemon
-network_checker --file /path/to/config.toml
+network_checker --file ~/.config/network_checker/config.toml
 ```
+
+Point the widget at it with `"command": "/home/you/.local/bin/network_checker"`.
 
 ## Remove
 
 ```sh
 omarchy plugin remove io.github.dr-moreira.network-checker
-rm -f ~/.local/bin/network_checker
 ```
 
-`~/.config/network_checker/config.toml` is left in place.
+Your `~/.config/network_checker/config.toml` is left in place.
 
 ## License
 

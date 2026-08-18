@@ -32,9 +32,10 @@ Panel {
   }
   readonly property string configuredCommand: String(setting("command", "") || "").trim()
   readonly property string configuredConfig: String(setting("configFile", "") || "").trim()
-  readonly property string checkerCommand: configuredCommand !== ""
-    ? configuredCommand
-    : (Quickshell.env("HOME") || "") + "/.local/bin/network_checker"
+  readonly property string bundledChecker: {
+    var url = String(Qt.resolvedUrl("checker/check.py"))
+    return url.indexOf("file://") === 0 ? url.slice(7) : url
+  }
   readonly property color foreground: bar ? bar.foreground : Color.foreground
   readonly property color urgent: bar ? bar.urgent : Color.urgent
   readonly property color dim: Qt.darker(foreground, 1.55)
@@ -75,7 +76,9 @@ Panel {
   function refresh() {
     if (checkProc.running) return
     refreshing = true
-    var cmd = [checkerCommand, "--json"]
+    var cmd
+    if (configuredCommand !== "") cmd = [configuredCommand, "--json"]
+    else cmd = ["python3", bundledChecker, "--json"]
     if (configuredConfig !== "") cmd.push("--file", configuredConfig)
     checkProc.command = cmd
     checkProc.running = true

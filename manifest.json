@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.dr-moreira.network-checker",
   "name": "Network Checker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Daniel Rangel",
   "license": "MIT",
   "description": "Ping and port status for home-lab servers on the Omarchy bar.",
