@@ -1,26 +1,27 @@
 {
   "schemaVersion": 1,
-  "id": "daniel.network-checker",
-  "name": "Home servers",
+  "id": "io.github.dr-moreira.network-checker",
+  "name": "Network Checker",
   "version": "1.0.0",
-  "author": "daniel",
+  "author": "Daniel Rangel",
   "license": "MIT",
-  "description": "Home-lab ping and port status from network_checker on the Omarchy bar.",
+  "description": "Ping and port status for home-lab servers on the Omarchy bar.",
   "kinds": [
     "bar-widget"
   ],
   "entryPoints": {
-    "barWidget": "Panel.qml"
+    "barWidget": "BarWidget.qml"
   },
   "barWidget": {
-    "displayName": "Home servers",
-    "description": "Show which home servers are online and which ports are open.",
+    "displayName": "Network Checker",
+    "description": "Show which configured hosts are online and which ports are open.",
     "category": "Network",
     "allowMultiple": false,
     "defaultSection": "right",
     "defaults": {
       "refreshIntervalSec": 60,
-      "command": ""
+      "command": "",
+      "configFile": ""
     },
     "schema": [
       {
@@ -36,6 +37,12 @@
         "key": "command",
         "type": "string",
         "label": "network_checker path",
+        "defaultValue": ""
+      },
+      {
+        "key": "configFile",
+        "type": "string",
+        "label": "Config TOML path",
         "defaultValue": ""
       }
     ]

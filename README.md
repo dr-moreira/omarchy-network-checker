@@ -1,41 +1,81 @@
-# daniel.network-checker
+# Network Checker
 
-Omarchy / Quickshell bar widget for [network_checker](https://github.com). Shows home-server ping and port status on the menubar.
+Omarchy bar widget that pings configured hosts and checks ports via the bundled `network_checker` Rust CLI. Offline servers highlight on the bar.
 
 ## Requirements
 
-- [Omarchy](https://omarchy.org/) with `omarchy-shell`
-- `network_checker` on `~/.local/bin/network_checker` (or set the widget `command` setting)
-- Servers listed in `~/.config/network_checker/config.toml`
-
-`network_checker` must support `--json`.
+- [Omarchy](https://omarchy.org/) with `omarchy-shell` (Quattro)
+- Rust/`cargo` to build the checker
+- `wl-copy` to copy a host from the panel
+- `iputils` (`ping`)
 
 ## Install
 
-From this folder (local checkout):
-
-```bash
-ln -sfn "$PWD" ~/.config/omarchy/plugins/daniel.network-checker
-omarchy-shell shell rescanPlugins
-omarchy plugin enable daniel.network-checker --section right
+```sh
+omarchy plugin add https://github.com/dr-moreira/omarchy-network-checker.git --enable
+~/.config/omarchy/plugins/io.github.dr-moreira.network-checker/install.sh
 ```
 
-From git once published:
+Edit `~/.config/network_checker/config.toml` with your hosts and ports. The installer writes an example file only when none exists.
 
-```bash
-omarchy plugin add <git-url> --enable --yes
+Local checkout:
+
+```sh
+./install.sh
+omarchy plugin add "$PWD" --enable
 ```
 
 ## Usage
 
-- Left click: open server list
+- Left click: open or close the server list
 - Middle / right click: refresh
-- Click a row: copy host to clipboard
+- Click a row: copy the host with `wl-copy`
 - `r` in the popup: refresh
+- Escape: close
 
-## Config
+```sh
+omarchy-shell shell summon io.github.dr-moreira.network-checker '{}'
+omarchy-shell shell hide io.github.dr-moreira.network-checker
+```
 
-Widget settings live in `~/.config/omarchy/shell.json` on the `daniel.network-checker` bar entry:
+## Configure
+
+```sh
+omarchy bar move io.github.dr-moreira.network-checker --section right
+```
+
+Widget settings on the bar entry in `~/.config/omarchy/shell.json`:
 
 - `refreshIntervalSec` — poll interval (default 60)
 - `command` — optional path to `network_checker`
+- `configFile` — optional TOML path passed as `--file`
+
+The checker also reads `~/.config/network_checker/config.toml` by default.
+
+```toml
+[[servers]]
+name = "NAS"
+host = "192.168.1.10"
+ports = [22, 445]
+```
+
+Standalone CLI:
+
+```sh
+network_checker --json
+network_checker --daemon
+network_checker --file /path/to/config.toml
+```
+
+## Remove
+
+```sh
+omarchy plugin remove io.github.dr-moreira.network-checker
+rm -f ~/.local/bin/network_checker
+```
+
+`~/.config/network_checker/config.toml` is left in place.
+
+## License
+
+MIT

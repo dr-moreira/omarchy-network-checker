@@ -1,0 +1,23 @@
+# Copy to ~/.config/network_checker/config.toml
+
+[[servers]]
+name = "Gateway"
+host = "192.168.1.1"
+ports = [80, 443]
+
+[[servers]]
+name = "NAS"
+host = "192.168.1.10"
+ports = [22, 445, 2049]
+
+[[servers]]
+name = "Home Assistant"
+host = "192.168.1.20"
+ports = [8123]
+
+[settings]
+port_timeout_ms = 2000
+check_interval_secs = 60
+
+[settings.notifications]
+desktop = false

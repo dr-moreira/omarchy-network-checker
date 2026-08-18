@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import qs.Commons
@@ -9,9 +8,11 @@ import "Model.js" as Model
 
 Panel {
   id: root
-  moduleName: "daniel.network-checker"
-  ipcTarget: "daniel.network-checker"
+  moduleName: "io.github.dr-moreira.network-checker"
   manageIpc: false
+
+  property var anchorItem: null
+  property var hostWidget: null
 
   property var servers: []
   property int onlineCount: 0
@@ -30,6 +31,7 @@ Panel {
     return n
   }
   readonly property string configuredCommand: String(setting("command", "") || "").trim()
+  readonly property string configuredConfig: String(setting("configFile", "") || "").trim()
   readonly property string checkerCommand: configuredCommand !== ""
     ? configuredCommand
     : (Quickshell.env("HOME") || "") + "/.local/bin/network_checker"
@@ -56,10 +58,26 @@ Panel {
   readonly property color hoverFill: bar ? Style.hoverFillFor(bar.foreground, Color.accent) : "transparent"
   readonly property color selectedFill: bar ? Style.selectedFillFor(bar.foreground, Color.accent) : "transparent"
 
+  function open() {
+    root.controller.show()
+  }
+
+  function close() {
+    root.controller.hide()
+  }
+
+  function switchPanel(direction) {
+    if (root.bar && typeof root.bar.switchPanelFrom === "function")
+      return root.bar.switchPanelFrom(root.hostWidget || root, direction)
+    return false
+  }
+
   function refresh() {
     if (checkProc.running) return
     refreshing = true
-    checkProc.command = [checkerCommand, "--json"]
+    var cmd = [checkerCommand, "--json"]
+    if (configuredConfig !== "") cmd.push("--file", configuredConfig)
+    checkProc.command = cmd
     checkProc.running = true
   }
 
@@ -125,9 +143,6 @@ Panel {
     copiedTimer.restart()
   }
 
-  implicitWidth: button.implicitWidth
-  implicitHeight: button.implicitHeight
-
   onOpenedChanged: if (opened) {
     cursorActive = false
     if (panelFlick) panelFlick.contentY = 0
@@ -135,34 +150,10 @@ Panel {
     Qt.callLater(function() { keyCatcher.forceActiveFocus() })
   }
 
-  IpcHandler {
-    target: root.ipcTarget
-    function open(): void { root.open() }
-    function close(): void { root.close() }
-    function show(): void { root.open() }
-    function hide(): void { root.close() }
-    function toggle(): void { root.toggle() }
-    function refresh(): string { root.refresh(); return "ok" }
-  }
-
-  WidgetButton {
-    id: button
-    anchors.fill: parent
-    bar: root.bar
-    text: root.barLabel
-    active: root.anyOffline || (root.lastError !== "" && root.totalCount === 0)
-    tooltipText: root.heroMeta
-    horizontalMargin: 8.75
-    onPressed: function(b) {
-      if (b === Qt.MiddleButton || b === Qt.RightButton) root.refresh()
-      else root.toggle()
-    }
-  }
-
   KeyboardPanel {
     id: panel
-    anchorItem: button
-    owner: root
+    anchorItem: root.anchorItem
+    owner: root.hostWidget || root
     bar: root.bar
     open: root.opened
     focusTarget: keyCatcher
@@ -202,7 +193,7 @@ Panel {
           PanelHero {
             id: hero
             width: parent.width
-            title: "Home servers"
+            title: "Network Checker"
             meta: root.heroMeta
             foreground: root.foreground
             fontFamily: root.fontFamily

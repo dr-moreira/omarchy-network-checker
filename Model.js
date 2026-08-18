@@ -44,11 +44,16 @@ function defaultCommand() {
   return ""
 }
 
+function defaultConfigFile() {
+  return ""
+}
+
 if (typeof module !== "undefined") {
   module.exports = {
     emptyReport: emptyReport,
     parseReport: parseReport,
     portsText: portsText,
-    defaultCommand: defaultCommand
+    defaultCommand: defaultCommand,
+    defaultConfigFile: defaultConfigFile
   }
 }
